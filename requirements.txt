@@ -1,5 +1,6 @@
 pandas
 openpyxl
-xlsxwriter
+requests
 selenium
 streamlit
+
