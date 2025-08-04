@@ -1,4 +1,5 @@
 pandas
-selenium
 openpyxl
+xlsxwriter
+selenium
 streamlit
