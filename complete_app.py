@@ -257,16 +257,29 @@ st.title("Sport Court Availability Checker")
 
 
 # Input fields
-sport_list_xlsx_path = 'https://github.com/jasonkristanto188/Get-Sports-Courts-Availability/blob/main/Sport%20List.xlsx'
-response = requests.get(sport_list_xlsx_path)
+sports_list = [
+    "Sepak Bola",
+    "Futsal",
+    "Mini Soccer",
+    "Badminton",
+    "Basketball",
+    "Tennis",
+    "Tenis Meja",
+    "Billiard",
+    "Golf",
+    "Padel",
+    "Squash",
+    "Hockey",
+    "Pickleball",
+    "Volley",
+    "Running",
+    "Fitness",
+    "Baseball",
+    "Softball",
+    "E-Sport"
+]
 
-# Check if the response is OK
-if response.status_code == 200:
-    sport_list_df = pd.read_excel(BytesIO(response.content), engine='openpyxl')
-else:
-    print("Failed to fetch the file:", response.status_code)
-# sport_list_df = pd.read_excel(sport_list_xlsx_path, engine='openpyxl')
-sport = st.selectbox("Choose sport", sport_list_df['Sport'].values.tolist())
+sport = st.selectbox("Choose sport", sports_list)
 
 city_list = ['Jakarta Selatan', 'Jakarta Barat', 'Jakarta Pusat', 'Jakarta Utara']
 city = st.selectbox("Choose city", city_list)
@@ -343,6 +356,7 @@ if st.button("Check Availability"):
         status.empty()
         status.write(f"Available {sport} Courts in {city}")
         status.dataframe(maindf)
+
 
 
 
