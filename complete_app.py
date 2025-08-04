@@ -254,7 +254,7 @@ st.title("Sport Court Availability Checker")
 
 # Input fields
 sport_list_xlsx_path = 'https://github.com/jasonkristanto188/Get-Sports-Courts-Availability/blob/main/Sport%20List.xlsx'
-sport_list_df = pd.read_excel(sport_list_xlsx_path)
+sport_list_df = pd.read_excel(sport_list_xlsx_path, engine='openpyxl')
 sport = st.selectbox("Choose sport", sport_list_df['Sport'].values.tolist())
 
 city_list = ['Jakarta Selatan', 'Jakarta Barat', 'Jakarta Pusat', 'Jakarta Utara']
@@ -264,7 +264,7 @@ start_date = st.date_input("Start date", value=date.today())
 end_date = st.date_input("End date", value=start_date, min_value=start_date)
 
 time_slots_xlsx_path = 'https://github.com/jasonkristanto188/Get-Sports-Courts-Availability/blob/main/Time%20Slots.xlsx'
-time_slots_df = pd.read_excel(time_slots_xlsx_path)
+time_slots_df = pd.read_excel(time_slots_xlsx_path, engine='openpyxl')
 time_slots = time_slots_df['Time Slots'].values.tolist()
 start_time_slot = st.selectbox("Choose start time slot", time_slots)
 index = time_slots.index(start_time_slot)
@@ -325,4 +325,5 @@ if st.button("Check Availability"):
         status.empty()
         status.write(f"Available {sport} Courts in {city}")
         status.dataframe(maindf)
+
 
