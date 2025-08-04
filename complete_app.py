@@ -1,8 +1,7 @@
 import os
 import sys
 import time
-import requests
-from io import BytesIO
+import json
 import pandas as pd 
 from datetime import datetime, timedelta, date
 from multiprocessing import Pool, freeze_support
@@ -254,31 +253,10 @@ st.set_page_config(
 
 st.title("Sport Court Availability Checker")
 
-
-
 # Input fields
-sports_list = [
-    "Sepak Bola",
-    "Futsal",
-    "Mini Soccer",
-    "Badminton",
-    "Basketball",
-    "Tennis",
-    "Tenis Meja",
-    "Billiard",
-    "Golf",
-    "Padel",
-    "Squash",
-    "Hockey",
-    "Pickleball",
-    "Volley",
-    "Running",
-    "Fitness",
-    "Baseball",
-    "Softball",
-    "E-Sport"
-]
 
+with open("sports.json", "r", encoding="utf-8") as f:
+    sports_list = json.load(f)
 sport = st.selectbox("Choose sport", sports_list)
 
 city_list = ['Jakarta Selatan', 'Jakarta Barat', 'Jakarta Pusat', 'Jakarta Utara']
@@ -287,16 +265,8 @@ city = st.selectbox("Choose city", city_list)
 start_date = st.date_input("Start date", value=date.today())
 end_date = st.date_input("End date", value=start_date, min_value=start_date)
 
-time_slots_xlsx_path = 'https://github.com/jasonkristanto188/Get-Sports-Courts-Availability/blob/main/Time%20Slots.xlsx'
-response = requests.get(time_slots_xlsx_path)
-
-# Check if the response is OK
-if response.status_code == 200:
-    time_slots_df = pd.read_excel(BytesIO(response.content), engine='openpyxl')
-else:
-    print("Failed to fetch the file:", response.status_code)
-# time_slots_df = pd.read_excel(time_slots_xlsx_path, engine='openpyxl')
-time_slots = time_slots_df['Time Slots'].values.tolist()
+with open("time_slots.json", "r", encoding="utf-8") as f:
+    time_slots = json.load(f)
 start_time_slot = st.selectbox("Choose start time slot", time_slots)
 index = time_slots.index(start_time_slot)
 end_time_slot = st.selectbox("Choose end time slot", time_slots[index + 1:])
@@ -356,8 +326,3 @@ if st.button("Check Availability"):
         status.empty()
         status.write(f"Available {sport} Courts in {city}")
         status.dataframe(maindf)
-
-
-
-
-
