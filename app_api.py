@@ -44,7 +44,7 @@ if st.button("Check Availability"):
     start_run_time = datetime.now()
     
     # Replace with your server's IP if not running locally
-    url = 'http://192.168.7.80:1881/get_court_schedule'
+    url = 'http://10.100.133.87:1881/get_court_schedule'
 
     payload = {
         "city": city,
@@ -54,25 +54,31 @@ if st.button("Check Availability"):
         "start_time": start_time,
         "end_time": end_time
     }
-    
+
     response = requests.post(url, json=payload)
-    non_empty_dfs = None
 
     if response.status_code == 200:
-        print("Results:", response.json())
+        # print("Results:", response.json())
         # json_data = response.json()
-        non_empty_dfs = pd.DataFrame(response.json())
+        flat_data = [record for sublist in response.json() for record in sublist]
+        dfs = pd.DataFrame(flat_data)
+        print(dfs)
 
-        maindf = pd.concat([maindf, *non_empty_dfs], ignore_index=True)
-        maindf = maindf.sort_values(by=['Date', 'Price', 'Location', 'Court'], ignore_index=True)
-        print(maindf)
-        status.empty()
-        status.write(f"Available {sport} Courts in {city}")
-        status.dataframe(maindf)
+        if len(dfs) == 0:
+            message = 'No available court...'
+            status.empty()
+            st.write(message)
+        else:
+            maindf = pd.concat([maindf, dfs], ignore_index=True)
+            maindf = maindf.sort_values(by=['Date', 'Price', 'Location', 'Court'], ignore_index=True)
+            print(maindf)
+            status.empty()
+            status.write(f"Available {sport} Courts in {city}")
+            status.dataframe(maindf)
     else:
-        print("Error:", response.status_code, response.text)
+        message = f'Error: {response.status_code} {response.text}'
+        print(message)
 
-        message = 'No available court...'
         status.empty()
         st.write(message)
 

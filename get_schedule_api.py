@@ -2,6 +2,8 @@
 
 from __dependencies import *
 
+app = Flask(__name__)
+
 def safe_click(driver, element):
     try:
         element.click()
@@ -164,6 +166,41 @@ def get_schedule_wrapper(web_options, city, chosen_sport, min_days_later, max_da
     else:
         return pd.DataFrame()
 
+@app.route('/get_court_schedule', methods=['POST'])
+def process_data():
+    data = request.get_json()
+
+    city = data['city']
+    sport = data['sport']
+    start_time = data['start_time']
+    end_time = data['end_time']
+    min_days_later = data['min_days_later']
+    max_days_later = data['max_days_later']
+
+    web_options = Options()
+    web_options.add_argument('--headless=new')
+    web_options.add_argument('--window-size=1920,1080')
+    web_options.add_argument('--disable-gpu')
+    prefs = {
+        "profile.managed_default_content_settings.images": 2,
+        "profile.managed_default_content_settings.fonts": 2
+    }
+    web_options.add_experimental_option("prefs", prefs)
+
+    process_pools = int(os.cpu_count() * 0.75)
+    location_list = get_location_list(web_options, city, sport)
+    if process_pools > len(location_list):
+        process_pools = len(location_list)
+
+    args_list = [(web_options, city, sport, min_days_later, max_days_later, loc, start_time, end_time) for loc in location_list]
+
+    with Pool(processes=process_pools) as pool:
+        dfs = pool.starmap(get_schedule_wrapper, args_list)
+    non_empty_dfs = [df for df in dfs if isinstance(df, pd.DataFrame) and not df.empty]
+
+    results = [df.to_dict(orient='records') for df in non_empty_dfs]
+    return jsonify(results)
+
 def get_location_list(web_options, city, chosen_sport):
     driver = webdriver.Edge(options=web_options)
     wait = WebDriverWait(driver, 60)
@@ -220,3 +257,6 @@ def get_location_list(web_options, city, chosen_sport):
     driver.quit()
 
     return location_list
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=1881, debug=False)
