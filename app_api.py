@@ -71,6 +71,7 @@ if st.button("Check Availability"):
         else:
             maindf = pd.concat([maindf, dfs], ignore_index=True)
             maindf = maindf.sort_values(by=['Date', 'Price', 'Location', 'Court'], ignore_index=True)
+            maindf = maindf[['Location', 'Court', 'Court Type', 'Price', 'Time Slot', 'Date']]
             print(maindf)
             status.empty()
             status.write(f"Available {sport} Courts in {city}")
