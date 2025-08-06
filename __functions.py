@@ -118,7 +118,7 @@ def get_data(venue_id, sport_id, date, start_time, end_time, location_name):
                     current_record = {
                         "Location": location_name,
                         "Court": field_name,
-                        "Price": slot.get("price"),
+                        "Price": f"{slot.get("price"):,}".replace(",", "."),
                         "Start Time": slot.get("start_time"),
                         "End Time": slot.get("end_time"),
                         "Date": slot.get("date")
@@ -135,4 +135,3 @@ def get_data(venue_id, sport_id, date, start_time, end_time, location_name):
 def fetch_data(args):
     venue_id, sport_id, date, start_time, end_time, location_name = args
     return get_data(venue_id, sport_id, date, start_time, end_time, location_name)
-
