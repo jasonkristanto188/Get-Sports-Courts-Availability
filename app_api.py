@@ -1,4 +1,4 @@
-from get_schedule_app import *
+from __functions import *
 freeze_support()
 
 st.set_page_config(
@@ -11,77 +11,58 @@ st.set_page_config(
 st.title("Sport Court Availability Checker")
 
 # Input fields
-with open("sports.json", "r", encoding="utf-8") as f:
-    sports_list = json.load(f)
+sports_menu_df = get_sports_menu()
+sports_list = sports_menu_df['Sport'].values.tolist()
 sport = st.selectbox("Choose sport", sports_list)
-
+sport_id = sports_menu_df.loc[sports_menu_df['Sport'] == sport, 'Sport ID'].values[0]
 city_list = ['Jakarta Selatan', 'Jakarta Barat', 'Jakarta Pusat', 'Jakarta Utara']
 city = st.selectbox("Choose city", city_list)
 
 start_date = st.date_input("Start date", value=date.today())
 end_date = st.date_input("End date", value=start_date, min_value=start_date)
-min_days_later = (start_date - date.today()).days
-max_days_later = (end_date - date.today()).days
 
 with open("time_slots.json", "r", encoding="utf-8") as f:
     time_slots = json.load(f)
-start_time_slot = st.selectbox("Choose start time slot", time_slots)
-index = time_slots.index(start_time_slot)
-end_time_slot = st.selectbox("Choose end time slot", time_slots[index + 1:])
+start_time = st.selectbox("Choose start time slot", time_slots)
+index = time_slots.index(start_time)
+end_time = st.selectbox("Choose end time slot", time_slots[index + 1:])
 
 # Submit button
 if st.button("Check Availability"):
     status = st.empty() 
 
     date_range_str = f'on {start_date}' if start_date == end_date else f'from {start_date} to {end_date}'
-    start_time = start_time_slot.split(':')[0].strip()
-    end_time = end_time_slot.split('-')[-1].split(':')[0].strip()
-    status.write(f"Searching {sport} court availability in {city} {date_range_str}, {start_time}:00 - {end_time}:00...")
+    status.write(f"Searching {sport} court availability in {city} {date_range_str}, {start_time} - {end_time}...")
     
-    # Here you can call your scraping function (after refactoring it to be reusable)
-    maindf = pd.DataFrame()
+    location_df = get_location_menu(sport, city)
+    print(location_df)
 
+    # Generate list of dates
+    date_list = [(start_date + timedelta(days=i)).strftime("%Y-%m-%d") 
+        for i in range((end_date - start_date).days + 1)]
+
+    # Prepare all tasks first
+    tasks = []
+    for index, row in location_df.iterrows():
+        venue_id = row['Venue ID']
+        location_name = row['Location Name']
+        for date in date_list:
+            tasks.append((venue_id, sport_id, date, start_time, end_time, location_name))
+    
     start_run_time = datetime.now()
-    
-    # Replace with your server's IP if not running locally
-    url = 'http://10.100.133.87:1881/get_court_schedule'
 
-    payload = {
-        "city": city,
-        "sport": sport,
-        "min_days_later": min_days_later,
-        "max_days_later": max_days_later,
-        "start_time": start_time,
-        "end_time": end_time
-    }
+    # Run in parallel
+    maindf = pd.DataFrame()
+    workers = 7 #range 5 - 10
+    with ThreadPoolExecutor(max_workers=workers) as executor:  # Adjust workers as needed
+        task_map = {executor.submit(fetch_data, task): task for task in tasks}
+        for future in as_completed(task_map):
+            task = task_map[future]  # This is the original (venue_id, date, location_name)
+            df = future.result()
+            # Now you know exactly which task this df came from
 
-    response = requests.post(url, json=payload)
-
-    if response.status_code == 200:
-        # print("Results:", response.json())
-        # json_data = response.json()
-        flat_data = [record for sublist in response.json() for record in sublist]
-        dfs = pd.DataFrame(flat_data)
-        print(dfs)
-
-        if len(dfs) == 0:
-            message = 'No available court...'
-            status.empty()
-            st.write(message)
-        else:
-            maindf = pd.concat([maindf, dfs], ignore_index=True)
-            maindf = maindf.sort_values(by=['Date', 'Price', 'Location', 'Court'], ignore_index=True)
-            maindf = maindf[['Location', 'Court', 'Court Type', 'Price', 'Time Slot', 'Date']]
-            print(maindf)
-            status.empty()
-            status.write(f"Available {sport} Courts in {city}")
-            status.dataframe(maindf)
-    else:
-        message = f'Error: {response.status_code} {response.text}'
-        print(message)
-
-        status.empty()
-        st.write(message)
+            if len(df) > 0:
+                maindf = pd.concat([maindf, df], ignore_index=True)
 
     finish_run_time = datetime.now()
     load_time = finish_run_time - start_run_time
@@ -89,3 +70,14 @@ if st.button("Check Availability"):
     print('start time:', start_run_time)
     print('finish time:', finish_run_time)
     print('load time:', load_time)
+
+    status.empty()
+    if len(maindf) == 0:
+        message = 'No available court...'
+        print(message)
+        status.write(message)
+    else:
+        maindf = maindf.sort_values(by=['Date', 'Price', 'Location', 'Court'], ignore_index=True)
+        print(maindf)
+        status.write(f"Available {sport} Courts in {city}")
+        status.dataframe(maindf)

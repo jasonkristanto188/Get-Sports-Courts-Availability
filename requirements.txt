@@ -1,6 +1,6 @@
 pandas
-openpyxl
-requests
 selenium
+openpyxl
 streamlit
-flask
+bs4
+requests
