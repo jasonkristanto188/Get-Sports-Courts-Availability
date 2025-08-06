@@ -29,7 +29,7 @@ def get_sports_menu():
     
     menu_df = pd.DataFrame(menu_list)
     menu_df.columns = ['Sport ID', 'Sport']
-    menu_df = menu_df.sort_values(by='Sport ID', ignore_index=True)
+    menu_df = menu_df.sort_values(by='Sport', ignore_index=True)
     
     return menu_df
 
@@ -135,3 +135,4 @@ def get_data(venue_id, sport_id, date, start_time, end_time, location_name):
 def fetch_data(args):
     venue_id, sport_id, date, start_time, end_time, location_name = args
     return get_data(venue_id, sport_id, date, start_time, end_time, location_name)
+
