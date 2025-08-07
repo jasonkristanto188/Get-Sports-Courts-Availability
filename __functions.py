@@ -129,6 +129,13 @@ def get_data(venue_id, sport_id, date, start_time, end_time, location_name):
     # Step 3: Create a DataFrame
     df = pd.DataFrame(records)
 
+    # Step 4: Group by shared attributes
+    if len(df) > 0:
+        df = df.groupby(["Location", "Court", "Price per Hour", "Date"]).agg({
+            "Start Time": "min",
+            "End Time": "max"
+        }).reset_index()
+
     return df
 
 # Define a wrapper for get_data
