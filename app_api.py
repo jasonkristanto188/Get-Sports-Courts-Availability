@@ -53,7 +53,7 @@ if st.button("Check Availability"):
 
     # Run in parallel
     maindf = pd.DataFrame()
-    workers = 7 #range 5 - 10
+    workers = 10 #range 5 - 10
     with ThreadPoolExecutor(max_workers=workers) as executor:  # Adjust workers as needed
         task_map = {executor.submit(fetch_data, task): task for task in tasks}
         for future in as_completed(task_map):
