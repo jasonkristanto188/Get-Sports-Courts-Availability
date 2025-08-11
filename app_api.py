@@ -38,12 +38,14 @@ start_time = st.slider(
 
 end_time = st.slider(
     "Choose end time",
-    min_value=start_time,
-    max_value=23,
+    min_value=start_time + 1,
+    max_value=24,
     value=8,
     step=1,
     format="%02d:00"
 )
+if end_time == 24:
+    end_time = 0
 
 start_time = f'0{start_time}:00' if start_time < 10 else f'{start_time}:00'
 end_time = f'0{end_time}:00' if end_time < 10 else f'{end_time}:00'
