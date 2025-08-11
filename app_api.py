@@ -25,8 +25,6 @@ with open("time_slots.json", "r", encoding="utf-8") as f:
     time_slots = json.load(f)
 start_time = st.selectbox("Choose start time slot", time_slots)
 index = time_slots.index(start_time)
-start_time = st.selectbox("Choose start time slot", time_slots)
-index = time_slots.index(start_time)
 time_slots.append('00:00')
 end_time = st.selectbox("Choose end time slot", time_slots[index + 1:])
 if end_time == '00:00':
@@ -87,6 +85,3 @@ if st.button("Check Availability"):
         status.dataframe(maindf)
     
     del maindf
-
-
-
