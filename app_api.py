@@ -25,33 +25,12 @@ with open("time_slots.json", "r", encoding="utf-8") as f:
     time_slots = json.load(f)
 start_time = st.selectbox("Choose start time slot", time_slots)
 index = time_slots.index(start_time)
-if start_time != '23:00':
-    end_time = st.selectbox("Choose end time slot", time_slots[index + 1:])
-else:
-    end_time = st.selectbox("Choose end time slot", '00:00')
-
-# start_time = st.slider(
-#     "Choose start time",
-#     min_value=0,
-#     max_value=23,
-#     value=0,
-#     step=1,
-#     format="%02d:00"
-# )
-
-# end_time = st.slider(
-#     "Choose end time",
-#     min_value=start_time + 1,
-#     max_value=24,
-#     value=start_time + 1,
-#     step=1,
-#     format="%02d:00"
-# )
-# if end_time == 24:
-#     end_time = 0
-
-# start_time = f'0{start_time}:00' if start_time < 10 else f'{start_time}:00'
-# end_time = f'0{end_time}:00' if end_time < 10 else f'{end_time}:00'
+start_time = st.selectbox("Choose start time slot", time_slots)
+index = time_slots.index(start_time)
+time_slots.append('00:00')
+end_time = st.selectbox("Choose end time slot", time_slots[index + 1:])
+if end_time == '00:00':
+    end_time = '24:00'
 
 # Submit button
 if st.button("Check Availability"):
@@ -108,5 +87,6 @@ if st.button("Check Availability"):
         status.dataframe(maindf)
     
     del maindf
+
 
 
