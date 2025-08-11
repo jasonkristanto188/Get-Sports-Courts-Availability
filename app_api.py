@@ -31,7 +31,7 @@ start_time = st.slider(
     "Choose start time",
     min_value=0,
     max_value=23,
-    value=8,
+    value=0,
     step=1,
     format="%02d:00"
 )
@@ -40,7 +40,7 @@ end_time = st.slider(
     "Choose end time",
     min_value=start_time + 1,
     max_value=24,
-    value=8,
+    value=start_time + 1,
     step=1,
     format="%02d:00"
 )
