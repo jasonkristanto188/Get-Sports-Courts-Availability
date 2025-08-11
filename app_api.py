@@ -53,7 +53,7 @@ if st.button("Check Availability"):
 
     # Run in parallel
     maindf = pd.DataFrame()
-    workers = 10 #range 5 - 10
+    workers = 7 #range 5 - 10
     with ThreadPoolExecutor(max_workers=workers) as executor:  # Adjust workers as needed
         task_map = {executor.submit(fetch_data, task): task for task in tasks}
         for future in as_completed(task_map):
@@ -77,7 +77,7 @@ if st.button("Check Availability"):
         print(message)
         status.write(message)
     else:
-        maindf = maindf.sort_values(by=['Date', 'Price', 'Location', 'Court'], ignore_index=True)
+        maindf = maindf.sort_values(by=['Date', 'Price', 'Start Time', 'Location', 'Court'], ignore_index=True)
         print(maindf)
         status.write(f"Available {sport} Courts in {city}")
         status.dataframe(maindf)
