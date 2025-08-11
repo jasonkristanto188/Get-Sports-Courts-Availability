@@ -75,8 +75,8 @@ def get_location_menu(sport, city):
 
         # Extract location
         location_tag = card.find("h5", class_="text-left s14-400")
-        location_text = location_tag.text.replace('Kota', '').strip() if 'Kota' in location_tag else location_text
-        
+        location_text = location_tag.text.replace('Kota', '').strip() if 'Kota' in location_tag else location_tag.text.strip()
+
         # Check for 'Padel' in <img alt="">
         sport_img_tags = card.find_all("img")
         padel_found = any(img.get("alt") == sport for img in sport_img_tags)
