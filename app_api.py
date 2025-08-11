@@ -81,3 +81,7 @@ if st.button("Check Availability"):
         print(maindf)
         status.write(f"Available {sport} Courts in {city}")
         status.dataframe(maindf)
+
+    del maindf
+    gc.collect()  # Force garbage collection to free memory
+    
