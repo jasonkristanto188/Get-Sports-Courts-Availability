@@ -23,9 +23,30 @@ end_date = st.date_input("End date", value=start_date, min_value=start_date)
 
 with open("time_slots.json", "r", encoding="utf-8") as f:
     time_slots = json.load(f)
-start_time = st.selectbox("Choose start time slot", time_slots)
-index = time_slots.index(start_time)
-end_time = st.selectbox("Choose end time slot", time_slots[index + 1:])
+# start_time = st.selectbox("Choose start time slot", time_slots)
+# index = time_slots.index(start_time)
+# end_time = st.selectbox("Choose end time slot", time_slots[index + 1:])
+
+start_time = st.slider(
+    "Choose start time",
+    min_value=0,
+    max_value=23,
+    value=8,
+    step=1,
+    format="%02d:00"
+)
+
+end_time = st.slider(
+    "Choose end time",
+    min_value=start_time,
+    max_value=23,
+    value=8,
+    step=1,
+    format="%02d:00"
+)
+
+start_time = f'0{start_time}:00' if start_time < 10 else f'{start_time}:00'
+end_time = f'0{end_time}:00' if end_time < 10 else f'{end_time}:00'
 
 # Submit button
 if st.button("Check Availability"):
@@ -57,7 +78,6 @@ if st.button("Check Availability"):
         for future in as_completed(task_map):
             task = task_map[future]  # This is the original (venue_id, date, location_name)
             df = future.result()
-            # Now you know exactly which task this df came from
 
             if len(df) > 0:
                 maindf = pd.concat([maindf, df], ignore_index=True)
@@ -81,7 +101,5 @@ if st.button("Check Availability"):
         print(maindf)
         status.write(f"Available {sport} Courts in {city}")
         status.dataframe(maindf)
-
-    del maindf
-    gc.collect()  # Force garbage collection to free memory
     
+    del maindf
