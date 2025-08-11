@@ -82,6 +82,7 @@ if st.button("Check Availability"):
         maindf = maindf.sort_values(by=['Date', 'Price per Hour', 'Start Time', 'Location', 'Court'], ignore_index=True)
         print(maindf)
         status.write(f"Available {sport} Courts in {city}")
-        status.dataframe(maindf)
+        status.dataframe(maindf, hide_index=True)
     
     del maindf
+
