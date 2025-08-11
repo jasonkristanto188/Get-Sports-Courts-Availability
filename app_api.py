@@ -18,7 +18,7 @@ sport_id = sports_menu_df.loc[sports_menu_df['Sport'] == sport, 'Sport ID'].valu
 city_list = ['Jakarta Selatan', 'Jakarta Barat', 'Jakarta Pusat', 'Jakarta Utara']
 city = st.selectbox("Choose city", city_list)
 
-start_date = st.date_input("Start date", value=date.today())
+start_date = st.date_input("Start date", value=date.today(), min_value=date.today())
 end_date = st.date_input("End date", value=start_date, min_value=start_date)
 
 with open("time_slots.json", "r", encoding="utf-8") as f:
@@ -85,4 +85,5 @@ if st.button("Check Availability"):
         status.dataframe(maindf, hide_index=True)
     
     del maindf
+
 
