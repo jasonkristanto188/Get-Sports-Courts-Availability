@@ -44,16 +44,14 @@ if st.button("Check Availability"):
     # Prepare all tasks first
     tasks = []
     for index, row in location_df.iterrows():
-        venue_id = row['Venue ID']
-        location_name = row['Location Name']
         for date in date_list:
-            tasks.append((venue_id, sport_id, date, start_time, end_time, location_name))
+            tasks.append((row['Venue ID'], sport_id, date, start_time, end_time, row['Location Name']))
     
     start_run_time = datetime.now()
 
     # Run in parallel
     maindf = pd.DataFrame()
-    workers = 7 #range 5 - 10
+    workers = 8 #range 5 - 10
     with ThreadPoolExecutor(max_workers=workers) as executor:  # Adjust workers as needed
         task_map = {executor.submit(fetch_data, task): task for task in tasks}
         for future in as_completed(task_map):
@@ -63,6 +61,8 @@ if st.button("Check Availability"):
 
             if len(df) > 0:
                 maindf = pd.concat([maindf, df], ignore_index=True)
+            
+            del df
 
     finish_run_time = datetime.now()
     load_time = finish_run_time - start_run_time
@@ -77,7 +77,7 @@ if st.button("Check Availability"):
         print(message)
         status.write(message)
     else:
-        maindf = maindf.sort_values(by=['Date', 'Price', 'Start Time', 'Location', 'Court'], ignore_index=True)
+        maindf = maindf.sort_values(by=['Date', 'Price per Hour', 'Start Time', 'Location', 'Court'], ignore_index=True)
         print(maindf)
         status.write(f"Available {sport} Courts in {city}")
         status.dataframe(maindf)

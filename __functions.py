@@ -112,13 +112,14 @@ def get_data(venue_id, sport_id, date, start_time, end_time, location_name):
     for field in response_json.get("fields", []):
         field_name = field.get("field_name")
         obtained_sport_id = field.get("sport_id")
-        if obtained_sport_id == sport_id:
+        total_available_slots = field.get('total_available_slots')
+        if obtained_sport_id == sport_id and total_available_slots > 0:
             for slot in field.get("slots", []):
                 if slot.get("is_available") == 1 and start_time <= slot.get("start_time") and slot.get("start_time") < end_time:
                     current_record = {
                         "Location": location_name,
                         "Court": field_name,
-                        "Price": f"{slot.get("price"):,}".replace(",", "."),
+                        "Price per Hour": f"{slot.get("price"):,}".replace(",", "."),
                         "Start Time": slot.get("start_time"),
                         "End Time": slot.get("end_time"),
                         "Date": slot.get("date")
@@ -129,12 +130,12 @@ def get_data(venue_id, sport_id, date, start_time, end_time, location_name):
     # Step 3: Create a DataFrame
     df = pd.DataFrame(records)
 
-    # # Step 4: Group by shared attributes
-    # if len(df) > 0:
-    #     df = df.groupby(["Location", "Court", "Price per Hour", "Date"]).agg({
-    #         "Start Time": "min",
-    #         "End Time": "max"
-    #     }).reset_index()
+    # Step 4: Group by shared attributes
+    if len(df) > 0:
+        df = df.groupby(["Location", "Court", "Price per Hour", "Date"]).agg({
+            "Start Time": "min",
+            "End Time": "max"
+        }).reset_index()
 
     return df
 
@@ -142,4 +143,3 @@ def get_data(venue_id, sport_id, date, start_time, end_time, location_name):
 def fetch_data(args):
     venue_id, sport_id, date, start_time, end_time, location_name = args
     return get_data(venue_id, sport_id, date, start_time, end_time, location_name)
-
